@@ -32,4 +32,4 @@ export declare function toD(ms: number): string;
  *
  * @param interval
  */
-export default function ms(interval: number, format?: string): string;
+export default function ms(interval: number): string;

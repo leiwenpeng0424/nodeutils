@@ -1,10 +1,7 @@
-// String start with '--' or '-'.
 const isArgFlag = (input: string): boolean => /^-{1,2}/.test(input);
 
-// Remove prefix '--' or '-'.
-const strip = (input: string): string => input.replace(/^-{1,2}/, "");
+const stripSlash = (input: string): string => input.replace(/^-{1,2}/, "");
 
-// Simple cmd input parser.
 const parser = <T extends object = Record<string, string | boolean>>(
     input: string[]
 ): T => {
@@ -19,12 +16,12 @@ const parser = <T extends object = Record<string, string | boolean>>(
             const next = arr[currentIndex + 1];
             if (isArgFlag(arg)) {
                 if (!next) {
-                    Object.assign(accumulator, { [strip(arg)]: true });
+                    Object.assign(accumulator, { [stripSlash(arg)]: true });
                 } else {
                     if (!isArgFlag(next)) {
-                        Object.assign(accumulator, { [strip(arg)]: next });
+                        Object.assign(accumulator, { [stripSlash(arg)]: next });
                     } else {
-                        Object.assign(accumulator, { [strip(arg)]: true });
+                        Object.assign(accumulator, { [stripSlash(arg)]: true });
                     }
                 }
             }

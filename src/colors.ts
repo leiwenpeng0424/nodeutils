@@ -20,12 +20,10 @@ const styles: Record<TColorsAndStyle, [string, string]> = {
     bgYellow: ["\u001b[43m", "\u001b[49m"],
 };
 
-const colors = (Object.keys(styles) as TColorsAndStyle[]).reduce(
+export default (Object.keys(styles) as TColorsAndStyle[]).reduce(
     (colors, key) => {
         colors[key] = (text: string) => styles[key][0] + text + styles[key][1];
         return colors;
     },
     {} as Record<TColorsAndStyle, (text: string) => string>
 );
-
-export default colors;
