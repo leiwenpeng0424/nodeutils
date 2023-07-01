@@ -1,0 +1,21 @@
+{
+    "name": "@nfts/nodeutils",
+    "version": "0.0.2",
+    "main": "./dist/index.cjs.js",
+    "module": "./dist/index.esm.js",
+    "types": "./dist/index.d.ts",
+    "scripts": {
+        "build": "beats"
+    },
+    "devDependencies": {
+        "@nfts/beats": "^0.0.5",
+        "@nfts/eslint-config": "^1.3.2",
+        "@types/node": "^20.3.3",
+        "prettier": "^2.8.8",
+        "tslib": "^2.6.0",
+        "typescript": "^5.1.6"
+    },
+    "prettier": {
+        "tabWidth": 4
+    }
+}
