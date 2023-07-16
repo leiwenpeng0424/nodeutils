@@ -1,7 +1,19 @@
+/**
+ * Start with -/--
+ * @param input
+ */
 const isArgFlag = (input: string): boolean => /^-{1,2}/.test(input);
 
+/**
+ * Strip slash -/--
+ * @param input
+ */
 const stripSlash = (input: string): string => input.replace(/^-{1,2}/, "");
 
+/**
+ * Minimal nodejs command arguments parser
+ * @param input
+ */
 const parser = <T extends object = Record<string, string | boolean>>(
     input: string[]
 ): T => {
