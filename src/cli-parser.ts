@@ -8,21 +8,30 @@ const isArgFlag = (input: string): boolean => /^-{1,2}/.test(input);
  * Strip slash -/--
  * @param input
  */
-const stripSlash = (input: string): string => input.replace(/^-{1,2}/, "");
+function stripSlash(input: string): string {
+    return input.replace(/^-{1,2}/, "");
+}
 
 /**
  * Minimal nodejs command arguments parser
  * @param input
  */
-const parser = <T extends object = Record<string, string | boolean>>(
+const parser = <T extends Record<string, string | boolean | string[]>>(
     input: string[]
 ): T => {
-    const lastNonArgFlagIndex = input.findIndex((curr) => isArgFlag(curr));
-    const _ = input.slice(
+    let newInput: string[] = [];
+
+    for (const str of input) {
+        newInput = newInput.concat(str.split("=").filter(Boolean));
+    }
+
+    const lastNonArgFlagIndex = newInput.findIndex((curr) => isArgFlag(curr));
+    const _ = newInput.slice(
         0,
         lastNonArgFlagIndex === -1 ? 1 : lastNonArgFlagIndex
     );
-    return input
+
+    return newInput
         .slice(_.length)
         .reduce((accumulator, arg, currentIndex, arr) => {
             const next = arr[currentIndex + 1];
@@ -31,7 +40,22 @@ const parser = <T extends object = Record<string, string | boolean>>(
                     Object.assign(accumulator, { [stripSlash(arg)]: true });
                 } else {
                     if (!isArgFlag(next)) {
-                        Object.assign(accumulator, { [stripSlash(arg)]: next });
+                        const key = stripSlash(arg);
+                        let value = accumulator[key];
+                        if (value) {
+                            if (Array.isArray(value)) {
+                                value = [...value, next];
+                            } else {
+                                value = [value as string, next];
+                            }
+                            Object.assign(accumulator, {
+                                [stripSlash(arg)]: value,
+                            });
+                        } else {
+                            Object.assign(accumulator, {
+                                [stripSlash(arg)]: next,
+                            });
+                        }
                     } else {
                         Object.assign(accumulator, { [stripSlash(arg)]: true });
                     }

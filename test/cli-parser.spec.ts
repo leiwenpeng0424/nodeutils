@@ -16,4 +16,18 @@ describe("parser test", () => {
         const { input } = parser(["beats", "--input", "src/index.ts"]);
         expect(input).toEqual("src/index.ts");
     });
+
+    it("array argument", () => {
+        const result = parser<{ input: string[] }>([
+            "beats",
+            "--watch",
+            "--input",
+            "src/index.ts",
+            "--input",
+            "src/cli.ts",
+            "--go",
+            "--name=leiwenpeng",
+        ]);
+        expect(result.input.length).toEqual(2);
+    });
 });

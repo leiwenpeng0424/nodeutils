@@ -6,7 +6,8 @@
     "types": "./dist/index.d.ts",
     "scripts": {
         "build": "beats --clean --sourcemap",
-        "dev": "beats --watch"
+        "dev": "beats --watch",
+        "test": "vitest"
     },
     "devDependencies": {
         "@nfts/beats": "^0.0.9",
