@@ -10,12 +10,15 @@
         "test": "vitest"
     },
     "devDependencies": {
-        "@nfts/beats": "^0.0.9",
+        "@nfts/beats": "^0.0.10",
         "@nfts/eslint-config": "^1.3.2",
         "@types/node": "^20.4.2",
         "prettier": "^2.8.8",
-        "tslib": "^2.6.0",
-        "typescript": "^5.1.6",
         "vitest": "^0.33.0"
+    },
+    "dependencies": {
+        "json5": "^2.2.3",
+        "tslib": "^2.6.0",
+        "typescript": "^4.9.5"
     }
 }

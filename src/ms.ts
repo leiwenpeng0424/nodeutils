@@ -1,35 +1,38 @@
-const precision = 2;
 const Units = ["ms", "s", "m", "h", "d"];
 
 /**
  * 毫秒转秒
  * @param ms
+ * @param precision
  */
-export function toS(ms: number): string {
+export function toS(ms: number, precision = 2): string {
     return (ms / 1000).toFixed(precision);
 }
 
 /**
  * 毫秒转分钟
  * @param ms
+ * @param precision
  */
-export function toM(ms: number): string {
+export function toM(ms: number, precision = 2): string {
     return (ms / 1000 / 60).toFixed(precision);
 }
 
 /**
  * 毫秒转小时
  * @param ms
+ * @param precision
  */
-export function toH(ms: number): string {
+export function toH(ms: number, precision = 2): string {
     return (ms / 1000 / 60 / 60).toFixed(precision);
 }
 
 /**
  * 毫秒转天数
  * @param ms
+ * @param precision
  */
-export function toD(ms: number): string {
+export function toD(ms: number, precision = 2): string {
     return (ms / 1000 / 60 / 60 / 24).toFixed(precision);
 }
 
@@ -46,8 +49,14 @@ export function toD(ms: number): string {
  *  120000000 | 1.39d
  *
  * @param interval
+ * @param options
  */
-export default function ms(interval: number): string {
+export default function ms(
+    interval: number,
+    options?: {
+        precision?: number;
+    }
+): string {
     // TODO: 添加对format的支持
     /** hh:mm:ss */
     let duration: string;
@@ -55,19 +64,19 @@ export default function ms(interval: number): string {
     if (interval < 1000) {
         duration = `${interval}${Units[0]}`;
     } else if (interval % (60 * 1000) === interval && interval < 60 * 1000) {
-        duration = toS(interval) + Units[1];
+        duration = toS(interval, options?.precision) + Units[1];
     } else if (
         interval % (1000 * 60 * 60) === interval &&
         interval < 1000 * 60 * 60
     ) {
-        duration = toM(interval) + Units[2];
+        duration = toM(interval, options?.precision) + Units[2];
     } else if (
         interval % (1000 * 60 * 60 * 24) === interval &&
         interval < 1000 * 60 * 60 * 24
     ) {
-        duration = toH(interval) + Units[3];
+        duration = toH(interval, options?.precision) + Units[3];
     } else {
-        duration = toD(interval) + Units[4];
+        duration = toD(interval, options?.precision) + Units[4];
     }
 
     return duration;

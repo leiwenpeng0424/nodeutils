@@ -47,12 +47,12 @@ const styles: Record<TColorsAndStyle, [string, string]> = {
     white: ["\u001b[37m", "\u001b[39m"],
     gray: ["\u001b[90m", "\u001b[39m"],
     brightRed: ["\u001b[91m", "\u001b[39m"],
-    brightGreen: ["\u001b[91m", "\u001b[39m"],
-    brightYellow: ["\u001b[91m", "\u001b[39m"],
-    brightBlue: ["\u001b[91m", "\u001b[39m"],
-    brightMagenta: ["\u001b[91m", "\u001b[39m"],
-    brightCyan: ["\u001b[91m", "\u001b[39m"],
-    brightWhite: ["\u001b[91m", "\u001b[39m"],
+    brightGreen: ["\u001b[92m", "\u001b[39m"],
+    brightYellow: ["\u001b[93m", "\u001b[39m"],
+    brightBlue: ["\u001b[94m", "\u001b[39m"],
+    brightMagenta: ["\u001b[95m", "\u001b[39m"],
+    brightCyan: ["\u001b[96m", "\u001b[39m"],
+    brightWhite: ["\u001b[97m", "\u001b[39m"],
 
     // BG Colors
     bgBlack: ["\u001b[40m", "\u001b[49m"],
