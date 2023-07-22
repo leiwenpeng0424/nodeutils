@@ -131,3 +131,6 @@ dist
 
 # declaration
 .declarations/
+
+pnpm-lock.yaml
+yarn.lock
