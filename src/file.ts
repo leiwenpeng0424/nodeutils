@@ -41,102 +41,73 @@ export const writeFileSync = (path: string, data: any) => {
     );
 };
 
-export interface IFindFileOptions {
-    ignore?: string;
-    levels?: number;
-}
-
-export async function findFile(
-    file: string,
-    folder: string,
-    options: IFindFileOptions = {}
-) {
-    folder = fullPath(folder);
-
-    if (!checkExist(folder)) {
-        throw Error(`Folder "${folder}" is not exist!`);
-    }
-
-    if (!options?.ignore) {
-        options.ignore = `(node_modules|git|idea|vscode)`;
-    }
-
-    if (options?.levels == null) {
-        options.levels = Infinity;
-    }
-
-    const fileNameReg = new RegExp(`^${file}$`, `gm`);
-    const ignoreNameReg = new RegExp(options.ignore, `gm`);
-
-    const scanDir = async (dir: string) => {
-        return await nodeFsPromise.readdir(dir);
-    };
-
-    const filterFile = async (file: string): Promise<boolean> => {
-        return fileNameReg.test(file);
-    };
-
-    const filterDir = async (dir: string): Promise<boolean> => {
-        return ignoreNameReg.test(dir);
-    };
-
-    const filesSatisfied: string[] = [];
-
-    const loop = async (dir: string, level: number) => {
-        const files = await scanDir(dir);
-
-        for await (const file of files) {
-            const _file = nodePath.join(dir, file);
-            const fileStat = await nodeFsPromise.stat(_file);
-
-            if (fileStat.isFile() && (await filterFile(file))) {
-                filesSatisfied.push(nodePath.join(dir, file));
-            }
-
-            const nextDir = nodePath.join(dir, file);
-
-            if (fileStat.isDirectory() && !(await filterDir(file))) {
-                if (options.levels != null && level >= options.levels) {
-                    break;
-                }
-
-                await loop(nextDir, level + 1);
-            }
-        }
-    };
-
-    await loop(folder, 1);
-
-    return filesSatisfied;
-}
-
-/**  */
-export function traverseDir(
+/**
+ * Traverse directory, visitor return truthy value will enter next level.
+ * @param dir
+ * @param visitor
+ */
+export function traverse(
     dir: string,
-    handler: (file: string, stats: Stats) => boolean
+    visitor: (file: string, stats: Stats) => boolean
 ) {
     const stats = nodeFs.statSync(dir);
-    if (stats.isDirectory() && handler(dir, stats)) {
-        nodeFs.readdirSync(dir).forEach((subFile) => {
-            traverseDir(nodePath.resolve(dir, subFile), handler);
-        });
+    if (stats.isDirectory() && visitor(dir, stats)) {
+        for (const subDirName of nodeFs.readdirSync(dir)) {
+            traverse(nodePath.resolve(dir, subDirName), visitor);
+        }
     } else if (stats.isFile()) {
-        handler(dir, stats);
+        visitor(dir, stats);
     }
 }
 
-/** Copy dir */
+/**
+ * Find file in folder recursively
+ * @param file
+ * @param folder
+ * @param ignore
+ */
+export function findFile(
+    file: string,
+    folder: string,
+    ignore = /(node_modules|\.git|\.idea)/
+) {
+    const fileNameReg = new RegExp(`\/${file}$`, `gm`);
+    folder = fullPath(folder);
+    let tFile: string | undefined;
+
+    traverse(
+        folder, //
+        (file) => {
+            if (fileNameReg.test(file)) {
+                tFile = file;
+                return false;
+            }
+
+            return !ignore.test(file);
+        }
+    );
+
+    return tFile;
+}
+
+/**
+ * Copy from source to destination.
+ * @param src
+ * @param dest
+ */
 export function copySync(src: string, dest: string) {
     const fullSrc = fullPath(src);
     const fullDest = fullPath(dest);
 
-    traverseDir(fullSrc, (file, stats) => {
+    traverse(fullSrc, (file, stats) => {
         const relativePath = nodePath.relative(fullSrc, file);
         const newPath = nodePath.resolve(fullDest, relativePath);
         if (stats.isFile()) {
             nodeFs.writeFileSync(newPath, nodeFs.readFileSync(file));
         } else if (stats.isDirectory()) {
             nodeFs.mkdirSync(newPath);
+        } else if (stats.isSymbolicLink()) {
+            //
         }
         return true;
     });
