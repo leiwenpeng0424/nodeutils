@@ -15,8 +15,6 @@ describe(`json operation`, () => {
     it("readjson throw error", () => {
         expect(() => {
             readJSONSync("a.json");
-        }).toThrow(
-            `no such file or directory, access '/Users/leiwenpeng/Developer/github/nodeutils/a.json'`
-        );
+        }).toThrow(`ENOENT: no such file or directory, open 'a.json'`);
     });
 });

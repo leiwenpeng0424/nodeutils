@@ -2,8 +2,7 @@ import json5 from "json5";
 import nodeFs from "node:fs";
 import nodeFsPromise from "node:fs/promises";
 import {
-    checkAccess,
-    fullPath,
+    normalize,
     buf2str,
     checkExist,
     writeFile,
@@ -28,9 +27,9 @@ export function isValidJSON(input: string): boolean {
 }
 
 export async function readJSON<T = unknown>(file: string): Promise<T> {
-    checkAccess(file);
+    await nodeFsPromise.open(file);
 
-    let content = await nodeFsPromise.readFile(fullPath(file), {
+    let content = await nodeFsPromise.readFile(normalize(file), {
         encoding: "utf-8",
     });
 
@@ -48,9 +47,9 @@ export async function readJSON<T = unknown>(file: string): Promise<T> {
 }
 
 export function readJSONSync<T = unknown>(file: string): T {
-    checkAccess(file);
+    nodeFs.openSync(file, "r");
 
-    let content = nodeFs.readFileSync(fullPath(file), {
+    let content = nodeFs.readFileSync(normalize(file), {
         encoding: "utf-8",
     });
 
@@ -72,8 +71,8 @@ export async function writeJSON(
     json: object,
     options?: IWriteFileOptions
 ): Promise<void> {
-    if (checkExist(fullPath(path)) || options?.force) {
-        await writeFile(fullPath(path), JSON.stringify(json, null, 4));
+    if (checkExist(normalize(path)) || options?.force) {
+        await writeFile(normalize(path), JSON.stringify(json, null, 4));
     } else {
         throw Error(`File path "${path}" is not exist!`);
     }
@@ -84,8 +83,8 @@ export function writeJSONSync(
     json: object,
     options?: IWriteFileOptions
 ): void {
-    if (checkExist(fullPath(path)) || options?.force) {
-        writeFileSync(fullPath(path), JSON.stringify(json, null, 4));
+    if (checkExist(normalize(path)) || options?.force) {
+        writeFileSync(normalize(path), JSON.stringify(json, null, 4));
     } else {
         throw Error(`File path "${path}" is not exist!`);
     }

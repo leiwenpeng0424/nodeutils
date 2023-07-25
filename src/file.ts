@@ -2,11 +2,12 @@ import nodePath from "node:path";
 import nodeFs, { Stats } from "node:fs";
 import nodeFsPromise from "node:fs/promises";
 
-export function checkAccess(file: string): void {
-    nodeFs.accessSync(fullPath(file));
-}
-
-export function fullPath(file: string, cwd: string = process.cwd()): string {
+/**
+ *
+ * @param file
+ * @param cwd
+ */
+export function normalize(file: string, cwd: string = process.cwd()): string {
     if (nodePath.isAbsolute(file)) {
         return file;
     }
@@ -14,29 +15,47 @@ export function fullPath(file: string, cwd: string = process.cwd()): string {
     return nodePath.join(cwd, file);
 }
 
+/**
+ * Buffer to string
+ * @param buf
+ */
 export function buf2str(buf: Buffer): string {
     return buf.toString(`utf-8`);
 }
 
+/**
+ *
+ * @param path
+ */
 export function checkExist(path: string): boolean | never {
     try {
-        nodeFs.openSync(fullPath(path), "r");
+        nodeFs.openSync(normalize(path), "r");
         return true;
     } catch (e) {
         return false;
     }
 }
 
+/**
+ *
+ * @param path
+ * @param data
+ */
 export const writeFile = async (path: string, data: any) => {
     await nodeFsPromise.writeFile(
-        fullPath(path),
+        normalize(path),
         typeof data === "string" ? data : JSON.stringify(data, null, 4)
     );
 };
 
+/**
+ *
+ * @param path
+ * @param data
+ */
 export const writeFileSync = (path: string, data: any) => {
     nodeFs.writeFileSync(
-        fullPath(path),
+        normalize(path),
         typeof data === "string" ? data : JSON.stringify(data, null, 4)
     );
 };
@@ -72,7 +91,7 @@ export function findFile(
     ignore = /(node_modules|\.git|\.idea)/
 ) {
     const fileNameReg = new RegExp(`\/${file}$`, `gm`);
-    folder = fullPath(folder);
+    folder = normalize(folder);
     let tFile: string | undefined;
 
     traverse(
@@ -96,19 +115,40 @@ export function findFile(
  * @param dest
  */
 export function copySync(src: string, dest: string) {
-    const fullSrc = fullPath(src);
-    const fullDest = fullPath(dest);
+    const fullSrc = normalize(src);
+    const fullDest = normalize(dest);
 
     traverse(fullSrc, (file, stats) => {
         const relativePath = nodePath.relative(fullSrc, file);
         const newPath = nodePath.resolve(fullDest, relativePath);
         if (stats.isFile()) {
             nodeFs.writeFileSync(newPath, nodeFs.readFileSync(file));
-        } else if (stats.isDirectory()) {
+        } else if (stats.isDirectory() && !nodeFs.existsSync(newPath)) {
             nodeFs.mkdirSync(newPath);
         } else if (stats.isSymbolicLink()) {
             //
         }
         return true;
     });
+}
+
+/**
+ * Delete folder
+ * @param src
+ */
+export function rmdirSync(src: string) {
+    const fullSrc = normalize(src);
+    const dirs: string[] = [];
+
+    traverse(fullSrc, (file, stats) => {
+        if (stats.isFile()) {
+            nodeFs.unlinkSync(file);
+        } else if (stats.isDirectory()) {
+            dirs.push(file);
+        }
+
+        return true;
+    });
+
+    dirs.reverse().forEach((dir) => nodeFs.rmdirSync(dir));
 }
