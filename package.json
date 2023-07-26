@@ -1,9 +1,9 @@
 {
     "name": "@nfts/nodeutils",
     "version": "0.0.3",
-    "main": "./dist/index.cjs.js",
-    "module": "./dist/index.esm.js",
-    "types": "./dist/index.d.ts",
+    "main": "npm/index.cjs.js",
+    "module": "npm/index.esm.js",
+    "types": "npm/index.d.ts",
     "scripts": {
         "build": "beats --clean --sourcemap",
         "dev": "beats --watch",
