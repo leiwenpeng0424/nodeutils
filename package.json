@@ -1,6 +1,6 @@
 {
     "name": "@nfts/nodeutils",
-    "version": "0.0.3",
+    "version": "0.0.4",
     "main": "npm/index.cjs.js",
     "module": "npm/index.esm.js",
     "types": "npm/index.d.ts",
