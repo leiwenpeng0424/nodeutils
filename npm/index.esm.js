@@ -2,8 +2,10 @@ import { createHash } from 'node:crypto';
 import nodeFs from 'node:fs';
 import nodeModule from 'node:module';
 import nodePath from 'node:path';
-import * as process from 'process';
+import * as process$1 from 'process';
 import { transpile, ScriptTarget, ModuleKind } from 'typescript';
+import nodeFsPromise from 'node:fs/promises';
+import json5 from 'json5';
 
 const isArgFlag = (input) => /^-{1,2}/.test(input);
 function stripSlash(input) {
@@ -115,7 +117,7 @@ function interopDefault(importModule) {
   return newMod;
 }
 function getNativeRequire(url) {
-  const requireMethod = nodeModule.createRequire(url != null ? url : process.cwd());
+  const requireMethod = nodeModule.createRequire(url != null ? url : process$1.cwd());
   return (id) => {
     return requireMethod(id);
   };
@@ -132,7 +134,7 @@ function getFileFullPath(moduleName) {
   if (nodePath.isAbsolute(moduleName)) {
     return moduleName;
   }
-  return nodePath.join(process.cwd(), moduleName);
+  return nodePath.join(process$1.cwd(), moduleName);
 }
 function transpileFileAndCreateRequire(file, requireUrl) {
   const sourceCode = nodeFs.readFileSync(file);
@@ -141,7 +143,7 @@ function transpileFileAndCreateRequire(file, requireUrl) {
     module: ModuleKind.CommonJS
   });
   const hash = createHash("sha256").update(transpiledSourceCode, "utf8").digest("hex");
-  const cacheFolder = nodePath.join(process.cwd(), `node_modules/.cache`);
+  const cacheFolder = nodePath.join(process$1.cwd(), `node_modules/.cache`);
   try {
     nodeFs.accessSync(cacheFolder);
   } catch (e) {
@@ -161,7 +163,7 @@ function transpileFileAndCreateRequire(file, requireUrl) {
 }
 function import_(id, options = {}) {
   const DefaultOptions = {
-    cwd: process.cwd(),
+    cwd: process$1.cwd(),
     nodeModule: `node_modules`
   };
   options = Object.assign({}, DefaultOptions, options);
@@ -218,5 +220,166 @@ function ms(interval, options) {
   return duration;
 }
 
-export { colors, module_, ms, parser };
+function normalize(file, cwd = process.cwd()) {
+  if (nodePath.isAbsolute(file)) {
+    return file;
+  }
+  return nodePath.join(cwd, file);
+}
+function buf2str(buf) {
+  return buf.toString(`utf-8`);
+}
+function checkExist(path) {
+  try {
+    nodeFs.openSync(normalize(path), "r");
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+const writeFile = async (path, data) => {
+  await nodeFsPromise.writeFile(
+    normalize(path),
+    typeof data === "string" ? data : JSON.stringify(data, null, 4)
+  );
+};
+const writeFileSync = (path, data) => {
+  nodeFs.writeFileSync(
+    normalize(path),
+    typeof data === "string" ? data : JSON.stringify(data, null, 4)
+  );
+};
+function traverse(dir, visitor) {
+  const stats = nodeFs.statSync(dir);
+  if (stats.isDirectory() && visitor(dir, stats)) {
+    for (const subDirName of nodeFs.readdirSync(dir)) {
+      traverse(nodePath.resolve(dir, subDirName), visitor);
+    }
+  } else if (stats.isFile()) {
+    visitor(dir, stats);
+  }
+}
+function findFile(file, folder, ignore = /(node_modules|\.git|\.idea)/) {
+  const fileNameReg = new RegExp(`/${file}$`, `gm`);
+  folder = normalize(folder);
+  let tFile;
+  traverse(
+    folder,
+    //
+    (file2) => {
+      if (fileNameReg.test(file2)) {
+        tFile = file2;
+        return false;
+      }
+      return !ignore.test(file2);
+    }
+  );
+  return tFile;
+}
+function copySync(src, dest) {
+  const fullSrc = normalize(src);
+  const fullDest = normalize(dest);
+  traverse(fullSrc, (file, stats) => {
+    const relativePath = nodePath.relative(fullSrc, file);
+    const newPath = nodePath.resolve(fullDest, relativePath);
+    if (stats.isFile()) {
+      nodeFs.writeFileSync(newPath, nodeFs.readFileSync(file));
+    } else if (stats.isDirectory() && !nodeFs.existsSync(newPath)) {
+      nodeFs.mkdirSync(newPath);
+    } else if (stats.isSymbolicLink()) ;
+    return true;
+  });
+}
+function rmdirSync(src) {
+  const fullSrc = normalize(src);
+  const dirs = [];
+  traverse(fullSrc, (file, stats) => {
+    if (stats.isFile()) {
+      nodeFs.unlinkSync(file);
+    } else if (stats.isDirectory()) {
+      dirs.push(file);
+    }
+    return true;
+  });
+  dirs.reverse().forEach((dir) => nodeFs.rmdirSync(dir));
+}
+
+var file = /*#__PURE__*/Object.freeze({
+    __proto__: null,
+    buf2str: buf2str,
+    checkExist: checkExist,
+    copySync: copySync,
+    findFile: findFile,
+    normalize: normalize,
+    rmdirSync: rmdirSync,
+    traverse: traverse,
+    writeFile: writeFile,
+    writeFileSync: writeFileSync
+});
+
+function isValidJSON(input) {
+  try {
+    JSON.parse(input);
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+async function readJSON(file) {
+  await nodeFsPromise.open(file);
+  let content = await nodeFsPromise.readFile(normalize(file), {
+    encoding: "utf-8"
+  });
+  if (Buffer.isBuffer(content)) {
+    content = buf2str(content);
+  }
+  try {
+    return json5.parse(content);
+  } catch (e) {
+    throw new Error(
+      `json5.parse() error, while processing content from ${file}`
+    );
+  }
+}
+function readJSONSync(file) {
+  nodeFs.openSync(file, "r");
+  let content = nodeFs.readFileSync(normalize(file), {
+    encoding: "utf-8"
+  });
+  if (Buffer.isBuffer(content)) {
+    content = buf2str(content);
+  }
+  try {
+    return json5.parse(content);
+  } catch (e) {
+    throw new Error(
+      `json5.parse() error, while processing content from ${file}`
+    );
+  }
+}
+async function writeJSON(path, json, options) {
+  if (checkExist(normalize(path)) || (options == null ? void 0 : options.force)) {
+    await writeFile(normalize(path), JSON.stringify(json, null, 4));
+  } else {
+    throw Error(`File path "${path}" is not exist!`);
+  }
+}
+function writeJSONSync(path, json, options) {
+  if (checkExist(normalize(path)) || (options == null ? void 0 : options.force)) {
+    writeFileSync(normalize(path), JSON.stringify(json, null, 4));
+  } else {
+    throw Error(`File path "${path}" is not exist!`);
+  }
+}
+
+var json = /*#__PURE__*/Object.freeze({
+    __proto__: null,
+    isValidJSON: isValidJSON,
+    readJSON: readJSON,
+    readJSONSync: readJSONSync,
+    writeJSON: writeJSON,
+    writeJSONSync: writeJSONSync
+});
+
+export { colors, file, json, module_, ms, parser };
 //# sourceMappingURL=index.esm.js.map
