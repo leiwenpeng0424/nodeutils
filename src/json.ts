@@ -2,9 +2,9 @@ import json5 from "json5";
 import nodeFs from "node:fs";
 import nodeFsPromise from "node:fs/promises";
 import {
-    normalize,
     buf2str,
     checkExist,
+    normalize,
     writeFile,
     writeFileSync,
 } from "./file";
@@ -27,7 +27,7 @@ export function isValidJSON(input: string): boolean {
 }
 
 export async function readJSON<T = unknown>(file: string): Promise<T> {
-    await nodeFsPromise.open(file);
+    await nodeFsPromise.access(file);
 
     let content = await nodeFsPromise.readFile(normalize(file), {
         encoding: "utf-8",

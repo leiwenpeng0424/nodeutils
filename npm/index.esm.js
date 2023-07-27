@@ -326,7 +326,7 @@ function isValidJSON(input) {
   }
 }
 async function readJSON(file) {
-  await nodeFsPromise.open(file);
+  await nodeFsPromise.access(file);
   let content = await nodeFsPromise.readFile(normalize(file), {
     encoding: "utf-8"
   });
