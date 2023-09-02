@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { ms } from "../src";
+import ms from "../src/ms";
 
 describe(`ms test case`, () => {
     it("should return correct format", function () {

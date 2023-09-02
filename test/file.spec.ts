@@ -1,6 +1,6 @@
-import { describe, it, expect } from "vitest";
-import { findFile, writeFile, writeFileSync, copySync } from "../src/file";
 import nodeFs from "node:fs";
+import { describe, expect, it } from "vitest";
+import { copySync, findFile, writeFile, writeFileSync } from "../src/file";
 
 describe(`file operation`, () => {
     it(`it should write with no error`, () => {

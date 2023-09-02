@@ -1,11 +1,11 @@
-import { describe, it, expect } from "vitest";
-import { module_ } from "../src";
+import { describe, expect, it } from "vitest";
+import * as m from "../src/m";
 
 describe("import", () => {
     it("should get config3", function () {
         let config;
         expect(() => {
-            config = module_.import_("./test/files/config2.json");
+            config = m.import_("./test/files/config2.json");
         }).not.throw();
         console.log(config);
         expect(config.name).toEqual("config");
@@ -14,7 +14,7 @@ describe("import", () => {
     it("should get config4", function () {
         let config;
         expect(() => {
-            config = module_.import_("./test/files/config4.ts");
+            config = m.import_("./test/files/config4.ts");
         }).not.throw();
         expect(config.name).toEqual("config");
     });

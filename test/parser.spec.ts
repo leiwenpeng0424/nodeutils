@@ -1,5 +1,5 @@
-import parser from "../src/cli-parser";
 import { describe, expect, it } from "vitest";
+import parser from "../src/parser";
 
 describe("parser test", () => {
     it("boolean argument", () => {

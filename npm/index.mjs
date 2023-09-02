@@ -431,3 +431,4 @@ function parser(input) {
 }
 
 export { colors, file, json, m, ms, parser };
+//# sourceMappingURL=index.mjs.map
