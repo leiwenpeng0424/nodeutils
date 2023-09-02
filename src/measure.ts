@@ -1,14 +1,16 @@
-import colors from "./colors";
+import { type PerformanceMeasure } from "perf_hooks";
 
 export type MeasureResult = {
     duration: number;
 };
 
-export function measureSync(mark: string, task: () => void) {
+export function measureSync(
+    mark: string,
+    task: () => void
+): PerformanceMeasure {
     performance.mark(`${mark} start`);
     task();
     performance.mark(`${mark} end`);
-
     return performance.measure(
         `${mark} start to end`,
         `${mark} start`,

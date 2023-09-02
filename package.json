@@ -9,7 +9,7 @@
         "dev": "wqnl --watch",
         "test": "vitest --watch false",
         "typecheck": "tsc --noEmit",
-        "prepublishOnly": "pnpm typecheck & pnpm build"
+        "prepublishOnly": "pnpm typecheck & pnpm test & pnpm build"
     },
     "devDependencies": {
         "@nfts/eslint-config": "^1.3.2",

@@ -71,26 +71,34 @@ export function readJSONSync<T = unknown>(file: string): T {
     }
 }
 
-export async function writeJSON(
-    path: string,
-    json: object,
-    options?: IWriteFileOptions
-): Promise<void> {
-    if (checkExist(normalize(path)) || options?.force) {
-        await writeFile(normalize(path), JSON.stringify(json, null, 4));
-    } else {
-        throw Error(`File path "${path}" is not exist!`);
+/**
+ * Write JSON data to file.
+ **/
+export async function writeJSON(path: string, json: object): Promise<void> {
+    if (!checkExist(normalize(path))) {
+        throw Error(`Write destination \`${path}\` is not exist!`);
+    }
+
+    try {
+        const _json = JSON.stringify(json, null, 4);
+        await writeFile(normalize(path), _json);
+    } catch (e) {
+        console.error(`Error while stringify json`);
     }
 }
 
-export function writeJSONSync(
-    path: string,
-    json: object,
-    options?: IWriteFileOptions
-): void {
-    if (checkExist(normalize(path)) || options?.force) {
-        writeFileSync(normalize(path), JSON.stringify(json, null, 4));
-    } else {
-        throw Error(`File path "${path}" is not exist!`);
+/**
+ * Write JSON data to file.
+ **/
+export function writeJSONSync(path: string, json: object): void {
+    if (!checkExist(normalize(path))) {
+        throw Error(`Write destination \`${path}\` is not exist!`);
+    }
+
+    try {
+        const _json = JSON.stringify(json, null, 4);
+        writeFileSync(normalize(path), _json);
+    } catch (e) {
+        console.error(`Error while stringify json`);
     }
 }

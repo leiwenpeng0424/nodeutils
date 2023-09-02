@@ -1,5 +1,5 @@
 import nodePath from "node:path";
-import nodeFs, { Stats } from "node:fs";
+import nodeFs, { type Stats } from "node:fs";
 import nodeFsPromise from "node:fs/promises";
 
 /**
@@ -139,10 +139,10 @@ export function copySync(src: string, dest: string) {
  * @param src
  */
 export function rmdirSync(src: string, removeRoot = true) {
-    const fullSrc = normalize(src);
+    const fullSource = normalize(src);
     const dirs: string[] = [];
 
-    traverse(fullSrc, (file, stats) => {
+    traverse(fullSource, (file, stats) => {
         if (stats.isFile()) {
             nodeFs.unlinkSync(file);
         } else if (stats.isDirectory()) {

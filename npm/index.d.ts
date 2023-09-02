@@ -62,10 +62,6 @@ declare function import_<T = unknown>(id: string, options?: IImportOptions): T;
  */
 declare function interopDefault<T = unknown>(importModule: any): T;
 
-declare interface IReadFileOptions {
-    format?: "JSON";
-}
-
 /**
  * Is your string a valid json string ?
  **/
@@ -75,10 +71,6 @@ declare function isValidJSON(input: string): boolean;
  * @param input
  */
 declare function isValidThirdLibName(input: string): boolean;
-
-declare interface IWriteFileOptions extends IReadFileOptions {
-    force?: boolean;
-}
 
 declare namespace json {
     export {
@@ -91,7 +83,7 @@ declare namespace json {
 }
 export { json }
 
-declare namespace module_ {
+declare namespace m {
     export {
         interopDefault,
         nativeRequire,
@@ -101,7 +93,7 @@ declare namespace module_ {
         import_
     }
 }
-export { module_ }
+export { m }
 
 /**
  * 计算时间间隔，并转换单位，可以通过 format 来格式化输出
@@ -192,8 +184,14 @@ declare const writeFile: (path: string, data: any) => Promise<void>;
  */
 declare const writeFileSync: (path: string, data: any) => void;
 
-declare function writeJSON(path: string, json: object, options?: IWriteFileOptions): Promise<void>;
+/**
+ * Write JSON data to file.
+ **/
+declare function writeJSON(path: string, json: object): Promise<void>;
 
-declare function writeJSONSync(path: string, json: object, options?: IWriteFileOptions): void;
+/**
+ * Write JSON data to file.
+ **/
+declare function writeJSONSync(path: string, json: object): void;
 
 export { }
