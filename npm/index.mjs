@@ -552,3 +552,4 @@ class Terminal {
 }
 
 export { Terminal, colors, file, json, m, ms, parser };
+//# sourceMappingURL=index.mjs.map
