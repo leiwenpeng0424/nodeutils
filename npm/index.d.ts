@@ -152,6 +152,23 @@ declare function rmdirSync(src: string, removeRoot?: boolean): void;
 
 declare type TColorsAndStyle = TSupportColor | TSupportStyle | TSupportBgColor;
 
+export declare class Terminal {
+    private x;
+    private y;
+    private maxCols;
+    private readonly stdin;
+    private readonly stdout;
+    private readonly rl;
+    constructor();
+    private _write;
+    nextLine(count?: number): this;
+    clearLine(cb?: () => void): this;
+    writeSameLine(content: string): this;
+    writeLine(content: string): this;
+    clearScreen(): this;
+    box(content: string | string[]): this;
+}
+
 /**
  * Compile file, and create node require.
  **/

@@ -5,13 +5,13 @@ import readline from "node:readline";
  * @param str
  * @param len
  */
-export function strSplitByLength(str: string, len: number): string[] {
+function strSplitByLength(str: string, len: number): string[] {
     const result = str.match(new RegExp(`(.{1,${len}})`, "g"));
     return result ?? [];
 }
 
 /** @link https://github.com/chalk/strip-ansi/blob/main/index.js */
-export function stripAnsi(
+function stripAnsi(
     text: string,
     { onlyFirst }: { onlyFirst: boolean } = { onlyFirst: true }
 ) {

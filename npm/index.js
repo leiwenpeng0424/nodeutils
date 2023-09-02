@@ -7,6 +7,7 @@ var json5 = require('json5');
 var node_crypto = require('node:crypto');
 var nodeModule = require('node:module');
 var typescript = require('typescript');
+var readline = require('node:readline');
 
 const styles = {
   // Text Style
@@ -432,10 +433,130 @@ function parser(input) {
   }, {});
 }
 
+var __defProp = Object.defineProperty;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __publicField = (obj, key, value) => {
+  __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
+  return value;
+};
+function strSplitByLength(str, len) {
+  const result = str.match(new RegExp(`(.{1,${len}})`, "g"));
+  return result != null ? result : [];
+}
+function stripAnsi(text, { onlyFirst } = { onlyFirst: true }) {
+  const pattern = [
+    "[\\u001B\\u009B][[\\]()#;?]*(?:(?:(?:(?:;[-a-zA-Z\\d\\/#&.:=?%@~_]+)*|[a-zA-Z\\d]+(?:;[-a-zA-Z\\d\\/#&.:=?%@~_]*)*)?\\u0007)",
+    "(?:(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PR-TZcf-nq-uy=><~]))"
+  ].join("|");
+  return text.replace(
+    //
+    new RegExp(pattern, onlyFirst ? void 0 : "g"),
+    ""
+  );
+}
+class Terminal {
+  constructor() {
+    __publicField(this, "x");
+    __publicField(this, "y");
+    __publicField(this, "maxCols");
+    __publicField(this, "stdin", process.stdin);
+    __publicField(this, "stdout", process.stdout);
+    __publicField(this, "rl");
+    this.rl = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout,
+      historySize: 0,
+      removeHistoryDuplicates: true,
+      tabSize: 4,
+      prompt: "",
+      terminal: process.stdout.isTTY
+    });
+    const pos = this.rl.getCursorPos();
+    this.x = pos.cols;
+    this.y = pos.rows;
+    this.maxCols = process.stdout.columns > 60 ? 60 : process.stdout.columns;
+  }
+  _write(content) {
+    readline.clearScreenDown(this.stdin);
+    const segments = strSplitByLength(content, this.maxCols);
+    segments.forEach((text) => {
+      this.rl.write(text);
+      this.y += 1;
+    });
+    return this;
+  }
+  nextLine(count = 1) {
+    this.y += count;
+    this.rl.write("\r");
+    return this;
+  }
+  clearLine(cb) {
+    process.stdout.cursorTo(0);
+    process.stdout.clearLine(1, () => {
+      cb == null ? void 0 : cb();
+    });
+    return this;
+  }
+  writeSameLine(content) {
+    this.clearLine(() => {
+      this._write(content);
+    });
+    return this;
+  }
+  writeLine(content) {
+    this._write(content);
+    return this;
+  }
+  clearScreen() {
+    this.x = 0;
+    this.y = 0;
+    readline.cursorTo(this.stdin, this.x, this.y);
+    readline.clearScreenDown(this.stdin);
+    return this;
+  }
+  box(content) {
+    this.writeLine(
+      `\u256D${Array(this.maxCols - 2).fill("\u2500").join("")}\u256E`
+    );
+    this.nextLine();
+    const padding = 4;
+    const writeCenter = (text) => {
+      const originLen = text.length;
+      const stripLen = stripAnsi(text).length;
+      const len = stripAnsi(text).length - (originLen - stripLen) - 0;
+      const restLen = this.maxCols - padding * 2;
+      if (restLen < len) {
+        strSplitByLength(text, restLen).forEach((t) => {
+          writeCenter(t);
+        });
+      } else {
+        const left = Math.ceil((restLen - len) / 2);
+        const leftPadding = "\u2502" + Array(left + padding - 1).fill(" ").join("");
+        const rightPadding = Array(restLen - left - len + padding - 1).fill(" ").join("") + "\u2502";
+        this.writeLine(`${leftPadding}${text}${rightPadding}`);
+        this.nextLine();
+      }
+    };
+    const contents = [
+      " ",
+      typeof content === "string" ? content : content,
+      " "
+    ].flat();
+    contents.forEach((t) => {
+      writeCenter(t);
+    });
+    this.writeLine(
+      `\u2570${Array(this.maxCols - 2).fill("\u2500").join("")}\u256F`
+    );
+    this.nextLine();
+    return this;
+  }
+}
+
+exports.Terminal = Terminal;
 exports.colors = colors;
 exports.file = file;
 exports.json = json;
 exports.m = m;
 exports.ms = ms;
 exports.parser = parser;
-//# sourceMappingURL=index.js.map
