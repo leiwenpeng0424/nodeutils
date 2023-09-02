@@ -11,6 +11,7 @@ interface IImportOptions {
 /**
  * @param importModule
  */
+// eslint-disable-next-line
 export function interopDefault<T = unknown>(importModule: any): T {
     if (
         !("default" in importModule) ||

@@ -8,14 +8,6 @@ import {
     writeFileSync,
 } from "./file";
 
-interface IReadFileOptions {
-    format?: "JSON";
-}
-
-interface IWriteFileOptions extends IReadFileOptions {
-    force?: boolean;
-}
-
 /**
  * Is your string a valid json string ?
  **/
