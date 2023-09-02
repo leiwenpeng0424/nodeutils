@@ -2,7 +2,9 @@
  * Start with -/--
  * @param input
  */
-const isArgFlag = (input: string): boolean => /^-{1,2}/.test(input);
+function isArgFlag(input: string): boolean {
+    return /^-{1,2}/.test(input);
+}
 
 /**
  * Strip slash -/--
@@ -16,9 +18,8 @@ function stripSlash(input: string): string {
  * Minimal nodejs command arguments parser
  * @param input
  */
-const parser = <T extends Record<string, string | boolean | string[]>>(
-    input: string[]
-): T => {
+// eslint-disable-next-line
+function parser<T extends Record<string, any>>(input: string[]): T {
     let newInput: string[] = [];
 
     for (const str of input) {
@@ -63,6 +64,6 @@ const parser = <T extends Record<string, string | boolean | string[]>>(
             }
             return accumulator;
         }, {} as T);
-};
+}
 
 export default parser;

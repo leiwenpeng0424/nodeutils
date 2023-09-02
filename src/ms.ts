@@ -1,7 +1,9 @@
+/**
+ * Units
+ **/
 const Units = ["ms", "s", "m", "h", "d"];
 
 /**
- * 毫秒转秒
  * @param ms
  * @param precision
  */
@@ -10,7 +12,6 @@ export function toS(ms: number, precision = 2): string {
 }
 
 /**
- * 毫秒转分钟
  * @param ms
  * @param precision
  */
@@ -19,7 +20,6 @@ export function toM(ms: number, precision = 2): string {
 }
 
 /**
- * 毫秒转小时
  * @param ms
  * @param precision
  */
@@ -28,7 +28,6 @@ export function toH(ms: number, precision = 2): string {
 }
 
 /**
- * 毫秒转天数
  * @param ms
  * @param precision
  */
@@ -40,7 +39,6 @@ export function toD(ms: number, precision = 2): string {
  * 计算时间间隔，并转换单位，可以通过 format 来格式化输出
  *
  * @example
- *
  *  input     | output
  *  12        | 12ms
  *  120000    | 2m
@@ -53,12 +51,10 @@ export function toD(ms: number, precision = 2): string {
  */
 export default function ms(
     interval: number,
-    options?: {
+    options: {
         precision?: number;
-    }
+    } = { precision: 2 }
 ): string {
-    // TODO: 添加对format的支持
-    /** hh:mm:ss */
     let duration: string;
 
     if (interval < 1000) {

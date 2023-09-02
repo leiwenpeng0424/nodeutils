@@ -1,11 +1,5 @@
 import { describe, it, expect } from "vitest";
-import {
-    findFile,
-    writeFile,
-    writeFileSync,
-    copySync,
-    rmdirSync,
-} from "../src/file";
+import { findFile, writeFile, writeFileSync, copySync } from "../src/file";
 import nodeFs from "node:fs";
 
 describe(`file operation`, () => {
@@ -22,10 +16,10 @@ describe(`file operation`, () => {
     });
 
     it("should return config file path", async function () {
-        rmdirSync("test/filesCopy");
         const file = findFile("config.json", ".");
+        // rmdirSync("test/filesCopy");
         expect(file).toEqual(
-            "/Users/leiwenpeng/Developer/github/nodeutils/test/files/config.json"
+            "/Users/leiwenpeng/Developer/github/nodeutils/test/filesCopy/config.json"
         );
     });
 });

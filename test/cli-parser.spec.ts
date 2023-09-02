@@ -18,7 +18,7 @@ describe("parser test", () => {
     });
 
     it("array argument", () => {
-        const result = parser<{ input: string[] }>([
+        const result = parser<{ input: string[]; name: string; age: string }>([
             "beats",
             "--watch",
             "--input",
@@ -27,7 +27,9 @@ describe("parser test", () => {
             "src/cli.ts",
             "--go",
             "--name=leiwenpeng",
+            "--age=12",
         ]);
+        console.log(result);
         expect(result.input.length).toEqual(2);
     });
 });

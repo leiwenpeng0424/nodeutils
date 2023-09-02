@@ -1,3 +1,19 @@
 {
-    "name": "config"
+    "$schema": "https://json.schemastore.org/tsconfig",
+    "compilerOptions": {
+        "outDir": "bundle",
+        "lib": ["ESNext"],
+        "module": "ESNext",
+        "target": "ESNext",
+        "importHelpers": false,
+        "strict": true,
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
+        "skipLibCheck": true,
+        "forceConsistentCasingInFileNames": true,
+        "moduleResolution": "node",
+
+        "noEmit": true
+    },
+    "include": ["src/"]
 }

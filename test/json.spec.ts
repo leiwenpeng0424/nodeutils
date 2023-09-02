@@ -1,19 +1,19 @@
 import { describe, it, expect } from "vitest";
-import { json as Json } from "..";
+import * as Json from "../src/json";
 
 describe(`json operation`, () => {
     it(`readjson`, () => {
-        const json = Json.readJSONSync<{ name: string }>(
-            `test/files/config.json`
+        const json = Json.readJSONSync<{ include: string[] }>(
+            `./test/files/config.json`
         );
-        expect(json.name).toEqual("config");
+        expect(json.include).toEqual(["src/"]);
     });
 
-    it("readjson sync", async function () {
-        const json = await Json.readJSON<{ name: string }>(
-            `test/files/config.json`
+    it("readjson async", async function () {
+        const json = await Json.readJSON<{ include: string[] }>(
+            `./test/files/config.json`
         );
-        expect(json.name).toEqual("config");
+        expect(json.include).toEqual(["src/"]);
     });
 
     it("readjson throw error", () => {

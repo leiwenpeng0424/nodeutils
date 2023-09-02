@@ -41,6 +41,7 @@ export function checkExist(path: string): boolean | never {
  * @param path
  * @param data
  */
+// eslint-disable-next-line
 export const writeFile = async (path: string, data: any) => {
     await nodeFsPromise.writeFile(
         normalize(path),
@@ -53,6 +54,7 @@ export const writeFile = async (path: string, data: any) => {
  * @param path
  * @param data
  */
+// eslint-disable-next-line
 export const writeFileSync = (path: string, data: any) => {
     nodeFs.writeFileSync(
         normalize(path),
@@ -126,7 +128,7 @@ export function copySync(src: string, dest: string) {
         } else if (stats.isDirectory() && !nodeFs.existsSync(newPath)) {
             nodeFs.mkdirSync(newPath);
         } else if (stats.isSymbolicLink()) {
-            //
+            // Skip
         }
         return true;
     });
@@ -136,7 +138,7 @@ export function copySync(src: string, dest: string) {
  * Delete folder
  * @param src
  */
-export function rmdirSync(src: string) {
+export function rmdirSync(src: string, removeRoot = true) {
     const fullSrc = normalize(src);
     const dirs: string[] = [];
 
@@ -151,4 +153,8 @@ export function rmdirSync(src: string) {
     });
 
     dirs.reverse().forEach((dir) => nodeFs.rmdirSync(dir));
+
+    if (removeRoot) {
+        nodeFs.rmdirSync(src);
+    }
 }

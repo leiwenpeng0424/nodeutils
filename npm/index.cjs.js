@@ -1,38 +1,20 @@
 'use strict';
 
 var node_crypto = require('node:crypto');
-var nodeFs = require('node:fs');
 var nodeModule = require('node:module');
 var nodePath = require('node:path');
-var process$1 = require('process');
 var typescript = require('typescript');
+var nodeFs = require('node:fs');
 var nodeFsPromise = require('node:fs/promises');
 var json5 = require('json5');
 
-function _interopNamespaceDefault(e) {
-    var n = Object.create(null);
-    if (e) {
-        Object.keys(e).forEach(function (k) {
-            if (k !== 'default') {
-                var d = Object.getOwnPropertyDescriptor(e, k);
-                Object.defineProperty(n, k, d.get ? d : {
-                    enumerable: true,
-                    get: function () { return e[k]; }
-                });
-            }
-        });
-    }
-    n.default = e;
-    return Object.freeze(n);
+function isArgFlag(input) {
+  return /^-{1,2}/.test(input);
 }
-
-var process__namespace = /*#__PURE__*/_interopNamespaceDefault(process$1);
-
-const isArgFlag = (input) => /^-{1,2}/.test(input);
 function stripSlash(input) {
   return input.replace(/^-{1,2}/, "");
 }
-const parser = (input) => {
+function parser(input) {
   let newInput = [];
   for (const str of input) {
     newInput = newInput.concat(str.split("=").filter(Boolean));
@@ -72,7 +54,7 @@ const parser = (input) => {
     }
     return accumulator;
   }, {});
-};
+}
 
 const styles = {
   // Text Style
@@ -138,7 +120,7 @@ function interopDefault(importModule) {
   return newMod;
 }
 function getNativeRequire(url) {
-  const requireMethod = nodeModule.createRequire(url != null ? url : process__namespace.cwd());
+  const requireMethod = nodeModule.createRequire(url != null ? url : process.cwd());
   return (id) => {
     return requireMethod(id);
   };
@@ -151,65 +133,60 @@ function isValidThirdLibName(input) {
     input
   );
 }
-function getFileFullPath(moduleName) {
-  if (nodePath.isAbsolute(moduleName)) {
-    return moduleName;
+function normalize$1(id) {
+  if (nodePath.isAbsolute(id)) {
+    return id;
   }
-  return nodePath.join(process__namespace.cwd(), moduleName);
+  return nodePath.join(process.cwd(), id);
 }
-function transpileFileAndCreateRequire(file, requireUrl) {
-  const sourceCode = nodeFs.readFileSync(file);
-  const transpiledSourceCode = typescript.transpile(sourceCode.toString("utf-8"), {
-    target: typescript.ScriptTarget.ESNext,
-    module: typescript.ModuleKind.CommonJS
-  });
-  const hash = node_crypto.createHash("sha256").update(transpiledSourceCode, "utf8").digest("hex");
-  const cacheFolder = nodePath.join(process__namespace.cwd(), `node_modules/.cache`);
-  try {
-    nodeFs.accessSync(cacheFolder);
-  } catch (e) {
-    nodeFs.mkdirSync(cacheFolder);
+function transpileAndRequire(file, requireUrl) {
+  var _a, _b;
+  const sourceCode = typescript.sys.readFile(file);
+  const { name: filename } = nodePath.parse(file);
+  if (sourceCode) {
+    const transpiledCode = typescript.transpile(sourceCode, {
+      target: typescript.ScriptTarget.ES2016,
+      module: typescript.ModuleKind.CommonJS
+    });
+    const hash = node_crypto.createHash("sha256").update(transpiledCode, "utf8").digest("hex");
+    const dist = process.cwd();
+    const tempFile = nodePath.resolve(dist, `${filename}.${hash}.js`);
+    typescript.sys.writeFile(tempFile, transpiledCode);
+    const requredModule = nativeRequire(
+      tempFile,
+      //
+      requireUrl
+    );
+    (_b = (_a = typescript.sys).deleteFile) == null ? void 0 : _b.call(_a, tempFile);
+    return requredModule;
   }
-  const transpiledSourceFile = nodePath.resolve(cacheFolder, `${hash}.js`);
-  nodeFs.writeFileSync(
-    transpiledSourceFile,
-    //
-    transpiledSourceCode
-  );
-  return nativeRequire(
-    transpiledSourceFile,
-    //
-    requireUrl
-  );
 }
 function import_(id, options = {}) {
   const DefaultOptions = {
-    cwd: process__namespace.cwd(),
+    cwd: process.cwd(),
     nodeModule: `node_modules`
   };
   options = Object.assign({}, DefaultOptions, options);
   options.nodeModule = nodePath.resolve(options.cwd, options.nodeModule);
   if (!isValidThirdLibName(id)) {
-    id = getFileFullPath(id);
+    id = normalize$1(id);
     const ext = nodePath.extname(id);
-    if ([`.json`, `.cjs`].includes(ext)) {
+    if ([`.json`].includes(ext)) {
       return nativeRequire(id, options.nodeModule);
     }
-    if ([".js", ".ts", ".mts", ".cts", ".mjs"].includes(ext)) {
-      return transpileFileAndCreateRequire(id, options.nodeModule);
-    }
+    return transpileAndRequire(id, options.nodeModule);
   }
   return nativeRequire(id, options.nodeModule);
 }
 
 var module_ = /*#__PURE__*/Object.freeze({
     __proto__: null,
-    getFileFullPath: getFileFullPath,
     import_: import_,
     interopDefault: interopDefault,
     isValidThirdLibName: isValidThirdLibName,
     nativeRequire: nativeRequire,
-    transpileFileAndCreateRequire: transpileFileAndCreateRequire
+    normalize: normalize$1,
+    transpileAndRequire: transpileAndRequire
 });
 
 const Units = ["ms", "s", "m", "h", "d"];
@@ -225,7 +202,7 @@ function toH(ms2, precision = 2) {
 function toD(ms2, precision = 2) {
   return (ms2 / 1e3 / 60 / 60 / 24).toFixed(precision);
 }
-function ms(interval, options) {
+function ms(interval, options = { precision: 2 }) {
   let duration;
   if (interval < 1e3) {
     duration = `${interval}${Units[0]}`;
@@ -241,6 +218,26 @@ function ms(interval, options) {
   return duration;
 }
 
+var __async$1 = (__this, __arguments, generator) => {
+  return new Promise((resolve, reject) => {
+    var fulfilled = (value) => {
+      try {
+        step(generator.next(value));
+      } catch (e) {
+        reject(e);
+      }
+    };
+    var rejected = (value) => {
+      try {
+        step(generator.throw(value));
+      } catch (e) {
+        reject(e);
+      }
+    };
+    var step = (x) => x.done ? resolve(x.value) : Promise.resolve(x.value).then(fulfilled, rejected);
+    step((generator = generator.apply(__this, __arguments)).next());
+  });
+};
 function normalize(file, cwd = process.cwd()) {
   if (nodePath.isAbsolute(file)) {
     return file;
@@ -258,12 +255,12 @@ function checkExist(path) {
     return false;
   }
 }
-const writeFile = async (path, data) => {
-  await nodeFsPromise.writeFile(
+const writeFile = (path, data) => __async$1(void 0, null, function* () {
+  yield nodeFsPromise.writeFile(
     normalize(path),
     typeof data === "string" ? data : JSON.stringify(data, null, 4)
   );
-};
+});
 const writeFileSync = (path, data) => {
   nodeFs.writeFileSync(
     normalize(path),
@@ -311,7 +308,7 @@ function copySync(src, dest) {
     return true;
   });
 }
-function rmdirSync(src) {
+function rmdirSync(src, removeRoot = true) {
   const fullSrc = normalize(src);
   const dirs = [];
   traverse(fullSrc, (file, stats) => {
@@ -323,6 +320,9 @@ function rmdirSync(src) {
     return true;
   });
   dirs.reverse().forEach((dir) => nodeFs.rmdirSync(dir));
+  if (removeRoot) {
+    nodeFs.rmdirSync(src);
+  }
 }
 
 var file = /*#__PURE__*/Object.freeze({
@@ -338,6 +338,26 @@ var file = /*#__PURE__*/Object.freeze({
     writeFileSync: writeFileSync
 });
 
+var __async = (__this, __arguments, generator) => {
+  return new Promise((resolve, reject) => {
+    var fulfilled = (value) => {
+      try {
+        step(generator.next(value));
+      } catch (e) {
+        reject(e);
+      }
+    };
+    var rejected = (value) => {
+      try {
+        step(generator.throw(value));
+      } catch (e) {
+        reject(e);
+      }
+    };
+    var step = (x) => x.done ? resolve(x.value) : Promise.resolve(x.value).then(fulfilled, rejected);
+    step((generator = generator.apply(__this, __arguments)).next());
+  });
+};
 function isValidJSON(input) {
   try {
     JSON.parse(input);
@@ -346,21 +366,35 @@ function isValidJSON(input) {
     return false;
   }
 }
-async function readJSON(file) {
-  await nodeFsPromise.access(file);
-  let content = await nodeFsPromise.readFile(normalize(file), {
-    encoding: "utf-8"
+function readJSON(file) {
+  return __async(this, null, function* () {
+    const readStream = nodeFs.createReadStream(file, {
+      flags: "r",
+      encoding: "utf-8"
+    });
+    let buf = "";
+    function pump() {
+      let pos;
+      while ((pos = buf.indexOf("\n")) >= 0) {
+        if (pos == 0) {
+          buf = buf.slice(1);
+          continue;
+        }
+        buf = buf.slice(pos + 1);
+      }
+    }
+    return new Promise((resolve) => {
+      readStream.on("data", (d) => {
+        buf += d.toString();
+        pump();
+      }).on("end", () => {
+        resolve(
+          //
+          json5.parse(buf)
+        );
+      });
+    });
   });
-  if (Buffer.isBuffer(content)) {
-    content = buf2str(content);
-  }
-  try {
-    return json5.parse(content);
-  } catch (e) {
-    throw new Error(
-      `json5.parse() error, while processing content from ${file}`
-    );
-  }
 }
 function readJSONSync(file) {
   nodeFs.openSync(file, "r");
@@ -378,12 +412,14 @@ function readJSONSync(file) {
     );
   }
 }
-async function writeJSON(path, json, options) {
-  if (checkExist(normalize(path)) || (options == null ? void 0 : options.force)) {
-    await writeFile(normalize(path), JSON.stringify(json, null, 4));
-  } else {
-    throw Error(`File path "${path}" is not exist!`);
-  }
+function writeJSON(path, json, options) {
+  return __async(this, null, function* () {
+    if (checkExist(normalize(path)) || (options == null ? void 0 : options.force)) {
+      yield writeFile(normalize(path), JSON.stringify(json, null, 4));
+    } else {
+      throw Error(`File path "${path}" is not exist!`);
+    }
+  });
 }
 function writeJSONSync(path, json, options) {
   if (checkExist(normalize(path)) || (options == null ? void 0 : options.force)) {
@@ -408,4 +444,3 @@ exports.json = json;
 exports.module_ = module_;
 exports.ms = ms;
 exports.parser = parser;
-//# sourceMappingURL=index.cjs.js.map
