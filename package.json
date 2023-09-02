@@ -1,6 +1,6 @@
 {
     "name": "@nfts/nodeutils",
-    "version": "0.0.6",
+    "version": "0.0.7",
     "main": "npm/index.js",
     "module": "npm/index.mjs",
     "types": "npm/index.d.ts",
